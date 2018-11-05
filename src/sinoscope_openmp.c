@@ -39,12 +39,13 @@ int sinoscope_image_openmp(sinoscope_t *ptr)
         float sino_time = sino.time;
         struct rgb c;
         int index, taylor;
-        
-        for (y = 1; y < height - 1; y++) {            
+        float val;
+
+        for (y = 1; y < height - 1; y++) { 
             float px = sino_dx * y - 2 * M_PI;
             float py = sino_dy * x - 2 * M_PI;
 
-            float val = 0.0f;
+            val = 0.0f;
             
             for (taylor = 1; taylor <= sino_taylor; taylor += 2) {
                 val += sin(px * taylor * sino_phase1 + sino_time) / taylor + cos(py * taylor * sino_phase0) / taylor;
@@ -52,8 +53,10 @@ int sinoscope_image_openmp(sinoscope_t *ptr)
             val = (atan(1.0 * val) - atan(-1.0 * val)) / (M_PI);
             val = (val + 1) * 100;
 
+            //TODO: rendre cette fonction thread safe
             value_color(&c, val, sino_interval, sino_interval_inv);
             index = (y * 3) + (x * 3) * width;
+            
             sino.buf[index + 0] = c.r;
             sino.buf[index + 1] = c.g;
             sino.buf[index + 2] = c.b;

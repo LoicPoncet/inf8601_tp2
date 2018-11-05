@@ -29,7 +29,7 @@ static cl_command_queue queue = NULL;
 static cl_context context = NULL;
 static cl_program prog = NULL;
 static cl_kernel kernel = NULL;
-
+static unsigned char image_buffer = calloc();
 static cl_mem output = NULL;
 
 int get_opencl_queue()
@@ -131,9 +131,7 @@ error:
 
 int create_buffer(int width, int height)
 {
-    /*
-     * TODO: initialiser la memoire requise avec clCreateBuffer()
-     */
+    //TODO: creer un buffer + clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, width*height*3, );
     cl_int ret = 0;
     goto error;
 done:
