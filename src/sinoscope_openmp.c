@@ -53,7 +53,6 @@ int sinoscope_image_openmp(sinoscope_t *ptr)
             val = (atan(1.0 * val) - atan(-1.0 * val)) / (M_PI);
             val = (val + 1) * 100;
 
-            //TODO: rendre cette fonction thread safe
             value_color(&c, val, sino_interval, sino_interval_inv);
             index = (y * 3) + (x * 3) * width;
             
