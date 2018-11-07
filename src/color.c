@@ -84,40 +84,38 @@ void value_color(struct rgb *color, float value, int interval, float interval_in
         *color = black;
         return;
     }
-    struct rgb c;
     int x = (((int)value % interval) * 255) * interval_inv;
     int i = value * interval_inv;
     switch(i) {
     case 0:
-        c.r = 0;
-        c.g = x;
-        c.b = 255;
+        color->r = 0;
+        color->g = x;
+        color->b = 255;
         break;
     case 1:
-        c.r = 0;
-        c.g = 255;
-        c.b = 255 - x;
+        color->r = 0;
+        color->g = 255;
+        color->b = 255 - x;
         break;
     case 2:
-        c.r = x;
-        c.g = 255;
-        c.b = 0;
+        color->r = x;
+        color->g = 255;
+        color->b = 0;
         break;
     case 3:
-        c.r = 255;
-        c.g = 255 - x;
-        c.b = 0;
+        color->r = 255;
+        color->g = 255 - x;
+        color->b = 0;
         break;
     case 4:
-        c.r = 255;
-        c.g = 0;
-        c.b = x;
+        color->r = 255;
+        color->g = 0;
+        color->b = x;
         break;
     default:
-        c = white;
+        *color = white;
         break;
     }
-    *color = c;
 }
 
 void hue(struct rgb **image, int width, int height)
