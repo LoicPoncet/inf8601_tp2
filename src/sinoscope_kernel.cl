@@ -86,7 +86,7 @@ void value_color(struct rgb *color, float value, int interval, float interval_in
 	*color = c;
 }
 
-__kernel void sinoscope_kernel(__global sinoscope_t *sino, __global unsigned char *image_buffer, __global const size_t *max_size)
+__kernel void sinoscope_kernel(__global sinoscope_t *ptr, __global unsigned char *image_buffer, __global const size_t *max_size)
 {
     int x, y, index, taylor;
     struct rgb c;
