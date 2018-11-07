@@ -105,10 +105,8 @@ __kernel void sinoscope_kernel(__global sinoscope_t *ptr, __global unsigned char
 	val = (val + 1) * 100;
 	value_color(&c, val, sino.interval, sino.interval_inv);
 	index = (y * 3) + (x * 3) * sino.width;
-	if(index < *max_size) {
-		#pragma OPENCL EXTENSION cl_khr_byte_addressable_store: enable
-		image_buffer[index + 0] = c.r;
-		image_buffer[index + 1] = c.g;
-		image_buffer[index + 2] = c.b;
-	}
+	#pragma OPENCL EXTENSION cl_khr_byte_addressable_store: enable
+	image_buffer[index + 0] = c.r;
+	image_buffer[index + 1] = c.g;
+	image_buffer[index + 2] = c.b;
 }
