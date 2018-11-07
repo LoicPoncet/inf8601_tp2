@@ -138,7 +138,7 @@ int create_buffer(int width, int height)
     //TODO: creer un buffer + clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, width*height*3, );
     cl_int ret = 0;
     sino = (sinoscope_t *)calloc(1, sizeof(sinoscope_t));
-    max_size = malloc(sizeof(size_t));
+    max_size = (size_t *)malloc(sizeof(size_t));
     image_buffer = (unsigned char*)calloc(width*height, 3);
     sino->buf = NULL;
     buffer_sino = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(sinoscope_t), sino, &ret);
