@@ -67,7 +67,7 @@ int get_opencl_queue()
         if (CL_SUCCESS == ret) {
             break;
         }
-        ret = clGetDeviceIDs(platform_ids[0], CL_DEVICE_TYPE_CPU, 1, &device, &num_dev);
+        ret = clGetDeviceIDs(platform_ids[i], CL_DEVICE_TYPE_GPU, 1, &device, &num_dev);
         if (CL_SUCCESS == ret) {
             break;
         }
@@ -141,11 +141,11 @@ int create_buffer(int width, int height)
     max_size = (size_t *)malloc(sizeof(size_t));
     image_buffer = (unsigned char*)calloc(width*height, 3);
     sino->buf = NULL;
-    buffer_sino = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(sinoscope_t), sino, &ret);
+    buffer_sino = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(sinoscope_t), NULL, &ret);
     ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for sino");
-    buffer_image_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, width*height*3*sizeof(unsigned char), image_buffer, &ret);
+    buffer_image_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, width*height*3*sizeof(unsigned char), NULL, &ret);
     ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for image buffer");
-    buffer_max_size = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(size_t), max_size, &ret);
+    buffer_max_size = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(size_t), NULL, &ret);
     ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for max_size");
     goto done;
 
