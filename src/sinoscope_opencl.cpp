@@ -29,7 +29,7 @@ static cl_command_queue queue = NULL;
 static cl_context context = NULL;
 static cl_program prog = NULL;
 static cl_kernel kernel = NULL;
-static unsigned char image_buffer = calloc();
+sinoscope_t *sino;
 static cl_mem output = NULL;
 
 int get_opencl_queue()
@@ -133,7 +133,11 @@ int create_buffer(int width, int height)
 {
     //TODO: creer un buffer + clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, width*height*3, );
     cl_int ret = 0;
+    sino = calloc(1, sizeof(sinoscope_t));
+    output = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(sino), sino, &ret);
+    if(ret == 0) goto done;
     goto error;
+
 done:
     return ret;
 error:
@@ -181,6 +185,7 @@ void opencl_shutdown()
     /*
      * TODO: liberer les ressources allouees
      */
+    free(sino);
 }
 
 int sinoscope_image_opencl(sinoscope_t *ptr)
@@ -207,9 +212,27 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
 
     cl_int ret = 0;
     cl_event ev;
+    size_t size = width*height;
 
     if (ptr == NULL)
         goto error;
+
+    sino = ptr;
+
+    ret = clSetKernelArg(queue, output, CL_TRUE, 0, sizeof(sinoscope_t), sino, 0, NULL, NULL);
+    ERR_THROW(CL_SUCCESS, err, "cannot set kernel arg");
+
+    ret = clEnqueueNDRangeKernel(queue, kernel, 1, NULL, &size, NULL, 0, NULL, &ev);
+    ERR_THROW(CL_SUCCESS, err, "cannot call the kernel");
+
+    ret = clFinish(queue);
+    ERR_THROW(CL_SUCCESS, err, "cannot wait the kernel to finish");
+
+    ret = clEnqueueReadBuffer(queue, output, CL_TRUE, 0, sizeof(sinoscope_t), sino, 0, NULL, &ev);
+    ERR_THROW(CL_SUCCESS, err, "cannot read the result");
+
+    if(ret == 0) goto done;
+    goto error;
 
 done:
     return ret;
