@@ -31,8 +31,10 @@ static cl_program prog = NULL;
 static cl_kernel kernel = NULL;
 sinoscope_t *sino;
 size_t *max_size;
+unsigned char *image_buffer;
 static cl_mem buffer_sino = NULL;
 static cl_mem buffer_max_size = NULL;
+static cl_mem buffer_image_buffer = NULL;
 
 int get_opencl_queue()
 {
@@ -137,9 +139,13 @@ int create_buffer(int width, int height)
     cl_int ret = 0;
     sino = (sinoscope_t *)calloc(1, sizeof(sinoscope_t));
     max_size = malloc(sizeof(size_t));
-    buffer_sino = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, sizeof(sino), sino, &ret);
+    image_buffer = (unsigned char*)calloc(width*height, 3);
+    sino->buf = NULL;
+    buffer_sino = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(sinoscope_t), sino, &ret);
     ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for sino");
-    buffer_max_size = clCreateBuffer(context, CL_READ_ONLY, sizeof(size_t), max_size, ret);
+    buffer_image_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, width*height*3*sizeof(unsigned char), image_buffer, &ret);
+    ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for image buffer");
+    buffer_max_size = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(size_t), max_size, &ret);
     ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for max_size");
     goto done;
 
@@ -192,6 +198,7 @@ void opencl_shutdown()
      */
     free(sino);
     free(max_size);
+    free(image_buffer);
 }
 
 int sinoscope_image_opencl(sinoscope_t *ptr)
@@ -219,25 +226,31 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
     cl_int ret = 0;
     cl_event ev;
     size_t *dims = (size_t *)calloc(2, sizeof(size_t));
+    size_t image_buffer_size = 3*ptr->width*ptr->height*sizeof(unsigned char);
 
     if (ptr == NULL)
         goto error;
 
-    sino = ptr;
     dims[0] = ptr->width;
     dims[1] = ptr->height;
     *max_size = ptr->width * ptr->height * 3;
 
-    ret = clEnqueueWriteBuffer(queue, buffer_sino, CL_TRUE, 0, sizeof(sino), sino, 0, NULL, &ev);
+    ret = clEnqueueWriteBuffer(queue, buffer_sino, CL_TRUE, 0, sizeof(sinoscope_t), ptr, 0, NULL, &ev);
     ERR_THROW(CL_SUCCESS, ret, "cannot send arg value: sino");
 
-    ret = clEnqueueWriteBuffer(queue, buffer_max_size, CL_TRUE, 0, sizeof(max_size), max_size, 0, NULL, &ev);
+    ret = clEnqueueWriteBuffer(queue, buffer_max_size, CL_TRUE, 0, sizeof(size_t), max_size, 0, NULL, &ev);
     ERR_THROW(CL_SUCCESS, ret, "cannot send arg value: max_size");
+
+    ret = clEnqueueWriteBuffer(queue, buffer_image_buffer, CL_TRUE, 0, image_buffer_size, image_buffer, 0, NULL, &ev);
+    ERR_THROW(CL_SUCCESS, ret, "cannot send arg value: image_buffer");
 
     ret = clSetKernelArg(kernel, 0, sizeof(cl_mem), &buffer_sino);
     ERR_THROW(CL_SUCCESS, ret, "cannot set kernel arg: sino");
 
-    ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), &buffer_max_size);
+    ret = clSetKernelArg(kernel, 1, sizeof(cl_mem), &buffer_image_buffer);
+    ERR_THROW(CL_SUCCESS, ret, "cannot set kernel arg: image_buffer");
+
+    ret = clSetKernelArg(kernel, 2, sizeof(cl_mem), &buffer_max_size);
     ERR_THROW(CL_SUCCESS, ret, "cannot set kernel arg: max_size");
 
     ret = clEnqueueNDRangeKernel(queue, kernel, 2, NULL, dims, NULL, 0, NULL, &ev);
@@ -246,8 +259,10 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
     ret = clFinish(queue);
     ERR_THROW(CL_SUCCESS, ret, "cannot wait the kernel to finish");
 
-    ret = clEnqueueReadBuffer(queue, buffer_sino, CL_TRUE, 0, sizeof(sinoscope_t), sino, 0, NULL, &ev);
+    ret = clEnqueueReadBuffer(queue, buffer_image_buffer, CL_TRUE, 0, image_buffer_size, image_buffer, 0, NULL, &ev);
     ERR_THROW(CL_SUCCESS, ret, "cannot read the result");
+
+    ptr->buf = image_buffer;
 
     if(ret == 0) goto done;
     goto error;

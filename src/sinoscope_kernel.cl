@@ -86,9 +86,8 @@ void value_color(struct rgb *color, float value, int interval, float interval_in
 	*color = c;
 }
 
-__kernel void sinoscope_kernel(__global sinoscope_t *ptr, __global const size_t max_size)
+__kernel void sinoscope_kernel(__global sinoscope_t sino, __global unsigned char *image_buffer, __global const size_t max_size)
 {
-    sinoscope_t sino = *ptr;
     int x, y, index, taylor;
     struct rgb c;
     float val, px, py;
@@ -107,8 +106,8 @@ __kernel void sinoscope_kernel(__global sinoscope_t *ptr, __global const size_t 
 	index = (y * 3) + (x * 3) * sino.width;
 	if(index < max_size) {
 		#pragma OPENCL EXTENSION cl_khr_byte_addressable_store: enable
-		sino.buf[index + 0] = c.r;
-		sino.buf[index + 1] = c.g;
-		sino.buf[index + 2] = c.b;
+		image_buffer[index + 0] = c.r;
+		image_buffer[index + 1] = c.g;
+		image_buffer[index + 2] = c.b;
 	}
 }
