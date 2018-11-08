@@ -63,10 +63,6 @@ int get_opencl_queue()
         ret = clGetPlatformInfo(platform_ids[i], CL_PLATFORM_NAME, BUF_SIZE, name, NULL);
         ERR_THROW(CL_SUCCESS, ret, "failed to get plateform info");
         cout << vendor << " " << name << "\n";
-        ret = clGetDeviceIDs(platform_ids[0], CL_DEVICE_TYPE_GPU, 1, &device, &num_dev);
-        if (CL_SUCCESS == ret) {
-            break;
-        }
         ret = clGetDeviceIDs(platform_ids[i], CL_DEVICE_TYPE_GPU, 1, &device, &num_dev);
         if (CL_SUCCESS == ret) {
             break;
