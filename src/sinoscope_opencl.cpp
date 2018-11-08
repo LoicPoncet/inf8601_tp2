@@ -255,10 +255,8 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
     ret = clFinish(queue);
     ERR_THROW(CL_SUCCESS, ret, "cannot wait the kernel to finish");
 
-    ret = clEnqueueReadBuffer(queue, buffer_image_buffer, CL_TRUE, 0, image_buffer_size, image_buffer, 0, NULL, &ev);
+    ret = clEnqueueReadBuffer(queue, buffer_image_buffer, CL_TRUE, 0, image_buffer_size, ptr->buf, 0, NULL, &ev);
     ERR_THROW(CL_SUCCESS, ret, "cannot read the result");
-
-    ptr->buf = image_buffer;
 
     if(ret == 0) goto done;
     goto error;
