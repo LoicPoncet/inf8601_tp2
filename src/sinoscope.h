@@ -9,10 +9,26 @@
 #define SINOSCOPE_H_
 
 typedef struct sinoscope sinoscope_t;
+typedef struct sinoscope_info sinoscope_info_t;
 
 struct sinoscope {
     unsigned char *buf;
     char *name;
+    int buf_size;
+    int width;
+    int height;
+    int interval;
+    int taylor;
+    float interval_inv;
+    float time;
+    float max;
+    float phase0;
+    float phase1;
+    float dx;
+    float dy;
+};
+
+struct sinoscope_info {
     int buf_size;
     int width;
     int height;

@@ -29,7 +29,7 @@ static cl_command_queue queue = NULL;
 static cl_context context = NULL;
 static cl_program prog = NULL;
 static cl_kernel kernel = NULL;
-sinoscope_t *sino;
+sinoscope_info_t *sino;
 size_t *max_size;
 unsigned char *image_buffer;
 static cl_mem buffer_sino = NULL;
@@ -133,12 +133,12 @@ int create_buffer(int width, int height)
 {
     //TODO: creer un buffer + clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_COPY_HOST_PTR, width*height*3, );
     cl_int ret = 0;
-    sino = (sinoscope_t *)calloc(1, sizeof(sinoscope_t));
+    sino = (sinoscope_info_t *)calloc(1, sizeof(sinoscope_info_t));
     max_size = (size_t *)malloc(sizeof(size_t));
     image_buffer = (unsigned char*)calloc(width*height, 3);
     sino->buf = NULL;
-    buffer_sino = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(sinoscope_t), NULL, &ret);
-    ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for sino");
+    buffer_sino = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(sinoscope_info_t), NULL, &ret);
+    ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for sino info");
     buffer_image_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, width*height*3*sizeof(unsigned char), NULL, &ret);
     ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for image buffer");
     buffer_max_size = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(size_t), NULL, &ret);
@@ -223,6 +223,8 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
     cl_event ev;
     size_t *dims = (size_t *)calloc(2, sizeof(size_t));
     size_t image_buffer_size = 3*ptr->width*ptr->height*sizeof(unsigned char);
+    sinoscope_info_t *info = (sinoscope_info_t*)malloc(sizeof(sinoscope_info_t));
+    info = ptr+2;
 
     if (ptr == NULL)
         goto error;
@@ -231,7 +233,7 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
     dims[1] = ptr->height;
     *max_size = ptr->width * ptr->height * 3;
 
-    ret = clEnqueueWriteBuffer(queue, buffer_sino, CL_TRUE, 0, sizeof(sinoscope_t), ptr, 0, NULL, &ev);
+    ret = clEnqueueWriteBuffer(queue, buffer_sino, CL_TRUE, 0, sizeof(sinoscope_info_t), info, 0, NULL, &ev);
     ERR_THROW(CL_SUCCESS, ret, "cannot send arg value: sino");
 
     ret = clEnqueueWriteBuffer(queue, buffer_max_size, CL_TRUE, 0, sizeof(size_t), max_size, 0, NULL, &ev);
