@@ -136,7 +136,6 @@ int create_buffer(int width, int height)
     sino = (sinoscope_info_t *)calloc(1, sizeof(sinoscope_info_t));
     max_size = (size_t *)malloc(sizeof(size_t));
     image_buffer = (unsigned char*)calloc(width*height, 3);
-    sino->buf = NULL;
     buffer_sino = clCreateBuffer(context, CL_MEM_READ_ONLY | CL_MEM_ALLOC_HOST_PTR, sizeof(sinoscope_info_t), NULL, &ret);
     ERR_THROW(CL_SUCCESS, ret, "cannot create buffer for sino info");
     buffer_image_buffer = clCreateBuffer(context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, width*height*3*sizeof(unsigned char), NULL, &ret);
@@ -224,7 +223,7 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
     size_t *dims = (size_t *)calloc(2, sizeof(size_t));
     size_t image_buffer_size = 3*ptr->width*ptr->height*sizeof(unsigned char);
     sinoscope_info_t *info = (sinoscope_info_t*)malloc(sizeof(sinoscope_info_t));
-    info = ptr+2;
+    info = (sinoscope_info_t*)ptr+2;
 
     if (ptr == NULL)
         goto error;
