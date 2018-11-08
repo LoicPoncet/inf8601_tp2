@@ -183,6 +183,8 @@ void opencl_shutdown()
     if (context)	clReleaseContext(context);
     if (buffer_sino) clReleaseMemObject(buffer_sino);
     if (buffer_image_buffer) clReleaseMemObject(buffer_image_buffer);
+    if (kernel) clReleaseKernel(kernel);
+    if (prog) clReleaseProgram(prog);
 
     /*
      * TODO: liberer les ressources allouees
