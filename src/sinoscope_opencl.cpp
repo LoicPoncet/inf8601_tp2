@@ -181,6 +181,8 @@ void opencl_shutdown()
 {
     if (queue) 	clReleaseCommandQueue(queue);
     if (context)	clReleaseContext(context);
+    if (buffer_sino) clReleaseMemObject(buffer_sino);
+    if (buffer_image_buffer) clReleaseMemObject(buffer_image_buffer);
 
     /*
      * TODO: liberer les ressources allouees
