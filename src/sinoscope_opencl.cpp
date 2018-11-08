@@ -223,7 +223,20 @@ int sinoscope_image_opencl(sinoscope_t *ptr)
     size_t *dims = (size_t *)calloc(2, sizeof(size_t));
     size_t image_buffer_size = 3*ptr->width*ptr->height*sizeof(unsigned char);
     sinoscope_info_t *info = (sinoscope_info_t*)malloc(sizeof(sinoscope_info_t));
-    info = (sinoscope_info_t*)ptr+2;
+    
+    // Copying the info in a struct info
+    info->buf_size = ptr->buf_size;
+    info->width = ptr->width;
+    info->height = ptr->height;
+    info->interval = ptr->interval;
+    info->taylor = ptr->taylor;
+    info->interval_inv = ptr->interval_inv;
+    info->time = ptr->time;
+    info->max = ptr->max;
+    info->phase0 = ptr->phase0;
+    info->phase1 = ptr->phase1;
+    info->dx = ptr->dx;
+    info->dy = ptr->dy;
 
     if (ptr == NULL)
         goto error;
