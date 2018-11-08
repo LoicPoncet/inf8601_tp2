@@ -17,21 +17,21 @@
 #define M_PI 3.14159265358979323846264338328
 #endif
 
-typedef struct sinoscope sinoscope_t;
+typedef struct sinoscope_info sinoscope_info_t;
 
-struct sinoscope {
-	unsigned char *buf;
-	int width;
-	int height;
-	int interval;
-	int taylor;
-	float interval_inv;
-	float time;
-	float max;
-	float phase0;
-	float phase1;
-	float dx;
-	float dy;
+struct sinoscope_info {
+    int buf_size;
+    int width;
+    int height;
+    int interval;
+    int taylor;
+    float interval_inv;
+    float time;
+    float max;
+    float phase0;
+    float phase1;
+    float dx;
+    float dy;
 };
 
 struct rgb {
@@ -86,12 +86,12 @@ void value_color(struct rgb *color, float value, int interval, float interval_in
 	*color = c;
 }
 
-__kernel void sinoscope_kernel(__global sinoscope_t *ptr, __global unsigned char *image_buffer, __global const size_t *max_size)
+__kernel void sinoscope_kernel(__global sinoscope_info_t *ptr, __global unsigned char *image_buffer, __global const size_t *max_size)
 {
     int x, y, index, taylor;
     struct rgb c;
     float val, px, py;
-	sinoscope_t sino = *ptr;
+	sinoscope_info_t sino = *ptr;
 
     x = get_global_id(0);
 	y = get_global_id(1);
